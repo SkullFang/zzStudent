@@ -1,0 +1,72 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.example.zhangyan.receivercompont"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    sourceSets {
+
+        staginge {
+            java.srcDirs = ['src/main/java/com/example/zhangyan/receivercompont']
+        }
+
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+    productFlavors {
+        /*
+          productFlavors-产品风格：
+                即不同产品的配置，它会基于上面的公共配置项defaultConfig
+                下面的配置项与buildTypes{}中的配置项，成类似sql中的全联(full join)关系
+                 当执行 $gradle build   命令后，会生成：
+                    module-flavor1-release-unaligned.apk
+                    module-flavor1-release.apk
+                    module-flavor1-debug-unaligned.apk
+                    module-flavor1-debug.apk
+                    module-flavor1-aabbcc.apk
+                    ...flavor2...apk
+
+          applicationId 用于标识 在谷歌Play商店上的唯一标识 默认不配置，则与app的AndroidManifest.xml中的package一致
+                仅替换<manifest>中的package属性值，其它不受影响
+
+         */
+
+        flavor1 {
+            proguardFiles 'proguard-rules.pro'
+            applicationId "com.stone.myapplication.pro" //比如 专业版
+            manifestPlaceholders = [channelID: "百度应用平台"]
+        }
+
+        flavor2 {
+            proguardFile 'proguard-rules.pro'
+            applicationId "com.stone.myapplication.free" //比如 免费版
+            manifestPlaceholders = [channelID: "豌豆夹"]
+        }
+    }
+
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.1.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
+}

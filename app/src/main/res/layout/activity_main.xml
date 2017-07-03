@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="接收端"
+        android:textSize="12pt" />
+
+    <LinearLayout
+
+
+
+
+
+    android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="593dp"
+        android:orientation="vertical">
+
+
+        <Button
+            android:id="@+id/lock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="11dp"
+            android:textSize="12pt"
+            android:background="@color/colorAccent"
+            android:text="锁定" />
+        <!--<Button-->
+            <!--android:id="@+id/link"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+
+            <!--android:layout_marginTop="11dp"-->
+            <!--android:background="@color/colorPrimary"-->
+            <!--android:text="链接"-->
+            <!--android:textSize="12pt"/>-->
+        <ImageView
+            android:id="@+id/img01"
+            android:adjustViewBounds="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/img02"
+            android:adjustViewBounds="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/img03"
+            android:adjustViewBounds="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/img04"
+            android:adjustViewBounds="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <!--<Button-->
+            <!--android:text="锁定"-->
+            <!--android:id="@+id/lock"-->
+            <!--android:width="160dp"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" />-->
+    </LinearLayout>
+
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="vertical"-->
+        <!--&gt;-->
+        <!--<EditText-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:inputType="numberSigned"-->
+            <!--android:ems="10"-->
+            <!--/>-->
+    <!--</LinearLayout>-->
+    <!--<LinearLayout-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:gravity="right" >-->
+
+        <!--<Button-->
+            <!--android:id="@+id/link"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+
+            <!--android:layout_marginTop="11dp"-->
+            <!--android:background="@color/colorPrimary"-->
+            <!--android:text="连接"-->
+            <!--android:textSize="12pt"/>-->
+
+
+
+        <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/bt_stop"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_marginTop="11dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:background="@color/colorAccent"&ndash;&gt;-->
+
+            <!--&lt;!&ndash;android:text="停止"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:textSize="12pt" />&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/bt_send"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="发送"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_marginTop="11dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:textSize="12pt"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:background="@color/colorPrimaryDark"/>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/lock"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_marginTop="11dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:textSize="12pt"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:background="@color/colorAccent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="锁定" />&ndash;&gt;-->
+
+</LinearLayout>
