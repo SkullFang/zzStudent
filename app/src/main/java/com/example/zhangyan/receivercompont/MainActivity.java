@@ -1,6 +1,7 @@
 package com.example.zhangyan.receivercompont;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private static boolean[] ss;
     private Thread th[]=new Thread[1];
     private static boolean stoppp=false;
+    private String ipname;
     // 锁定屏幕
 
     //处理UI的handle
@@ -142,21 +144,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//强制竖屏
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 //        new linkThread().start();//链接线程启动
 //        sendFun();
         initView();
         initReceive();
         autolink();
-        screen();
+//        screen();
 //        closeBar();
 //        linkPc();
 
     }
     private void autolink(){
         lockScreen=new LockScreen(this);
-        new linkThread().start();//链接线程启动
+        Intent intent=getIntent();
+        Bundle data=intent.getExtras();
+        ipname=data.getString("ipname");
+
+        Log.i("ip",ipname);
+        new linkThread(ipname).start();//链接线程启动
     }
-//    private void linkPc(){
+    //    private void linkPc(){
 //        lockScreen=new LockScreen(this);
 //        Button linkbtn=(Button)findViewById(R.id.link);
 //        new linkThread().start();//链接线程启动
@@ -167,25 +175,25 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 //    }
-private void closeBar() {
-    try {
-        String command;
-        command = "LD_LIBRARY_PATH=/vendor/lib:/system/lib service call activity 42 s16 com.android.systemui";
-        ArrayList<String> envlist = new ArrayList<String>();
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet()) {
-            envlist.add(envName + "=" + env.get(envName));
+    private void closeBar() {
+        try {
+            String command;
+            command = "LD_LIBRARY_PATH=/vendor/lib:/system/lib service call activity 42 s16 com.android.systemui";
+            ArrayList<String> envlist = new ArrayList<String>();
+            Map<String, String> env = System.getenv();
+            for (String envName : env.keySet()) {
+                envlist.add(envName + "=" + env.get(envName));
+            }
+            String[] envp = envlist.toArray(new String[0]);
+            Process proc = Runtime.getRuntime().exec(
+                    new String[] { "su", "-c", command }, envp);
+            proc.waitFor();
+        } catch (Exception ex) {
+            // Toast.makeText(getApplicationContext(), ex.getMessage(),
+            // Toast.LENGTH_LONG).show();
         }
-        String[] envp = envlist.toArray(new String[0]);
-        Process proc = Runtime.getRuntime().exec(
-                new String[] { "su", "-c", command }, envp);
-        proc.waitFor();
-    } catch (Exception ex) {
-        // Toast.makeText(getApplicationContext(), ex.getMessage(),
-        // Toast.LENGTH_LONG).show();
     }
-}
-public static void showBar() {
+    public static void showBar() {
         try {
             String command;
             command = "LD_LIBRARY_PATH=/vendor/lib:/system/lib am startservice -n com.android.systemui/.SystemUIService";
@@ -203,17 +211,16 @@ public static void showBar() {
         }
     }
 
-    private void screen(){
-        lockScreen=new LockScreen(this);
-        lock=(Button)findViewById(R.id.lock);
-        lock.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                lockScreen.show(true);
-                System.out.println("按了");
-            }
-        });
-    }
+//    private void screen(){
+//        lockScreen=new LockScreen(this);
+//        lock=(Button)findViewById(R.id.lock);
+//        lock.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
+//    }
 
 
     public static String getHostIP() {
@@ -251,13 +258,17 @@ public static void showBar() {
         private boolean flagstart=false;
         private boolean flagend=false;
         private boolean flagscreen=false;
-
+        private String ipp;
+        linkThread(String ipp){
+            this.ipp=ipp;
+            Log.i("ipp",ipp);
+        }
         @Override
         public void run() {
             //初始化一个socket
             try {
                 final InetAddress addr=InetAddress.getLocalHost();
-                sc = new Socket("192.168.1.104", 12370);
+                sc = new Socket(ipp, 12370);
 //                save.getSocket(sc);
                 BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream(), "UTF-8"));
                 String str = null;
@@ -282,7 +293,7 @@ public static void showBar() {
                             }
                             else if (finalStr.equals(getHostIP())&&!flagscreen){
                                 Log.i("发送","启动");
-                                    sendd(1);
+                                sendd(1);
                                 flagscreen=true;
 
                             }
@@ -349,6 +360,7 @@ public static void showBar() {
         /**
          * 此接收方的编号
          */
+
         private int senderNumber = -1;
         private DatagramPacket packet = null;
         private MulticastSocket multicastSocket = null;//用于组播传送的
@@ -375,7 +387,7 @@ public static void showBar() {
 //                    System.out.println(nowseq);
 //                    System.out.println(senderNumber);
                     //System.out.println("nowseq="+nowseq+" senderNumber="+senderNumber);
-                    subImages[senderNumber] = scaleBitmap(BitmapFactory.decodeStream(input),0.5F);
+                    subImages[senderNumber] = scaleBitmap(BitmapFactory.decodeStream(input),0.85F);
                     Message msg=new Message();
                     if (this.senderNumber == 0) {//0号线程负责处理屏幕大小的问题
                         subHeight = subImages[senderNumber].getHeight();
@@ -407,7 +419,7 @@ public static void showBar() {
     private void sendd(int i){
         int id;
         if(i==1) {
-            ServerComponent server = new ServerComponent("192.168.1.104", 7800, 10, 2);
+            ServerComponent server = new ServerComponent(ipname, 7899, 10, 2);
             Thread serverThread = new Thread(server);
             serverThread.start();
             th[0]=serverThread;
@@ -498,7 +510,7 @@ public static void showBar() {
 //    }
 //
     public class ServerComponent implements Runnable{
-        private int PORT=7800; //端口
+        private int PORT=7899; //端口
         private int SEQMAX=10;
         private int ImageBlockNumber=2;
         private InetAddress address;
@@ -531,28 +543,40 @@ public static void showBar() {
             }
             toend=false;
         }
-        private void gainImage(){
-            View view = getWindow().getDecorView();
+        private void gainImage(){  //获取屏幕有问题
+//            View view = getWindow().getDecorView();
+//            view.setDrawingCacheEnabled(true);
+//            view.buildDrawingCache();
+//            Bitmap b1 = view.getDrawingCache();
+//
+//            // 获取状态栏高度
+//            Rect frame = new Rect();
+//            getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+//            int statusBarHeight = frame.top;
+//
+//            // 获取屏幕长和高
+//            int width = getWindowManager().getDefaultDisplay().getWidth();
+//            int height = getWindowManager().getDefaultDisplay().getHeight();
+//            // 去掉标题栏
+//            if(width>height){
+//                int t=width;
+//                width=height;
+//                height=t;
+//            }
+//            b = Bitmap.createBitmap(b1, 0, statusBarHeight, width, height);
+//            view.destroyDrawingCache();
+            //获取当前屏幕的大小
+            int width = getWindow().getDecorView().getRootView().getWidth();
+            int height = getWindow().getDecorView().getRootView().getHeight();
+            //生成相同大小的图片
+            b = Bitmap.createBitmap( width, height, Bitmap.Config.ARGB_8888 );
+            //找到当前页面的跟布局
+            View view =  getWindow().getDecorView().getRootView();
+            //设置缓存
             view.setDrawingCacheEnabled(true);
             view.buildDrawingCache();
-            Bitmap b1 = view.getDrawingCache();
-
-            // 获取状态栏高度
-            Rect frame = new Rect();
-            getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-            int statusBarHeight = frame.top;
-
-            // 获取屏幕长和高
-            int width = getWindowManager().getDefaultDisplay().getWidth();
-            int height = getWindowManager().getDefaultDisplay().getHeight();
-            // 去掉标题栏
-            if(width>height){
-                int t=width;
-                width=height;
-                height=t;
-            }
-            b = Bitmap.createBitmap(b1, 0, statusBarHeight, width, height);
-            view.destroyDrawingCache();
+            //从缓存中获取当前屏幕的图片
+            b = view.getDrawingCache();
         }
         private void createSenders(){
             for(int i=0;i<ImageBlockNumber;i++){
@@ -607,7 +631,7 @@ public static void showBar() {
                 ByteArrayOutputStream baos=new ByteArrayOutputStream();
                 int quality=50;
 
-                bitmap.compress(Bitmap.CompressFormat.JPEG,quality,baos);
+                bitmap.compress(Bitmap.CompressFormat.JPEG,10,baos);
                 byte[] data=baos.toByteArray();
                 packet=new DatagramPacket(data,data.length,address,PORT);
 //                byte[] data="test".getBytes();
