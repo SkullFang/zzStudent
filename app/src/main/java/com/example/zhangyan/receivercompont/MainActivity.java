@@ -251,7 +251,36 @@ public class MainActivity extends AppCompatActivity {
         return hostIp;
 
     }
+    class autoSendBreak extends Thread{
+        Socket socket=null;
+        boolean isConnect=true;
+        String ipp=null;
+        autoSendBreak(Socket socket,String ipp){
+            this.socket=socket;
+            this.ipp=ipp;
+        }
 
+        @Override
+        public void run() {
+            while (isConnect) {
+                try {
+                    socket.sendUrgentData(0xFF);
+                } catch (IOException e) {
+                    isConnect=false;
+                    linkThread.interrupted();
+                    new linkThread(ipp).start();
+
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     class linkThread extends Thread{
         private Socket sc;
@@ -269,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 final InetAddress addr=InetAddress.getLocalHost();
                 sc = new Socket(ipp, 12370);
+                new autoSendBreak(sc,ipp).start();
 //                save.getSocket(sc);
                 BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream(), "UTF-8"));
                 String str = null;
