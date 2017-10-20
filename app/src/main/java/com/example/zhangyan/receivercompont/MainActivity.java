@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet6Address;
@@ -150,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
         initView();
         initReceive();
         autolink();
+
+
 //        screen();
 //        closeBar();
 //        linkPc();
@@ -162,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         ipname=data.getString("ipname");
 
         Log.i("ip",ipname);
-        new linkThread(ipname).start();//链接线程启动
+        new ServerClient(ipname).start();//链接线程启动
     }
     //    private void linkPc(){
 //        lockScreen=new LockScreen(this);
@@ -251,95 +254,264 @@ public class MainActivity extends AppCompatActivity {
         return hostIp;
 
     }
-    class autoSendBreak extends Thread{
-        Socket socket=null;
-        boolean isConnect=true;
-        String ipp=null;
-        autoSendBreak(Socket socket,String ipp){
-            this.socket=socket;
-            this.ipp=ipp;
-        }
+    /*
+    接受心跳保持长链接
+//     */
+//    class reBreak extends Thread{
+//        Socket socket;
+//        reBreak(Socket socket){
+//            this.socket=socket;
+//        }
+//        @Override
+//        public void run() {
+//            try {
+//                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+//                String str = null;
+//                while ((str = br.readLine()) != null) {
+//
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//    }
 
-        @Override
-        public void run() {
-            while (isConnect) {
-                try {
-                    socket.sendUrgentData(0xFF);
-                } catch (IOException e) {
-                    isConnect=false;
-                    linkThread.interrupted();
-                    new linkThread(ipp).start();
-
-                    e.printStackTrace();
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-
-                    e.printStackTrace();
-                }
+    /*
+    自动重连
+     */
+//    class autoSendBreak extends Thread{
+//        Socket socket=null;
+//        boolean isConnect=true;
+//        String ipp=null;
+//        autoSendBreak(Socket socket,String ipp){
+//            this.socket=socket;
+//            this.ipp=ipp;
+//        }
+//
+//        @Override
+//        public void run() {
+//            while (isConnect) {
+//                try {
+//                    socket.sendUrgentData(0xFF);
+//                } catch (IOException e) {
+//                    isConnect=false;
+//                    linkThread.interrupted();
+//                    new linkThread(ipp).start();
+//
+//                    e.printStackTrace();
+//                }
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
+    public class ServerClient extends  Thread{
+        Socket socket;
+        BufferedReader in;
+        PrintWriter out;
+        BufferedReader line;
+        boolean running = true;
+        private String IP=null;
+        private int PORT;
+        private void sendMessageH(String strInput) {
+            if(strInput!=null){
+            out.println(strInput);
+            System.out.println("CLIENT PUT INFO: " + strInput);
+            if ("exit".equals(strInput)) {
+                running = false;
+            }
             }
         }
-    }
-
-    class linkThread extends Thread{
-        private Socket sc;
-        private boolean flagstart=false;
-        private boolean flagend=false;
-        private boolean flagscreen=false;
-        private String ipp;
-        linkThread(String ipp){
-            this.ipp=ipp;
-            Log.i("ipp",ipp);
+        ServerClient(String ip){
+            this.IP=ip;
         }
+
         @Override
         public void run() {
-            //初始化一个socket
             try {
-                final InetAddress addr=InetAddress.getLocalHost();
-                sc = new Socket(ipp, 12370);
-                new autoSendBreak(sc,ipp).start();
-//                save.getSocket(sc);
-                BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream(), "UTF-8"));
-                String str = null;
-                while ((str = br.readLine()) != null) {
-                    final String finalStr = str;
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i("测试",finalStr);
-                            Log.i("本机IP",getHostIP());
-                            if (finalStr.equals("1")&&!flagstart) {
-                                lockScreen.show(true);
-                                closeBar();
-                                flagstart=true;
-                                flagend=false;
-                            }
-                            else if (finalStr.equals("2")&&!flagend) {
-                                lockScreen.show(false);
-                                showBar();
-                                flagend=true;
-                                flagstart=false;
-                            }
-                            else if (finalStr.equals(getHostIP())&&!flagscreen){
-                                Log.i("发送","启动");
-                                sendd(1);
-                                flagscreen=true;
+                socket = new Socket(IP, 12370);
+                new autoSendBreak(socket,IP).start();
+                in = new BufferedReader(new InputStreamReader(
+                        socket.getInputStream()));
+                out = new PrintWriter(socket.getOutputStream(), true);
+                line = new BufferedReader(new InputStreamReader(System.in));
+                new ServerClient.ServerListener().start();
 
-                            }
-                            else if(finalStr.equals("3")&&flagscreen){
-                                sendd(2);
-                                flagscreen=false;
-                            }
+                while (running) {
+                    sendMessageH(line.readLine());
 
-                        }
-                    });
                 }
+
+                line.close();
+                out.close();
+                in.close();
+                socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+        class ServerListener extends Thread {
+            private Socket sc;
+            private boolean flagstart=false;
+            private boolean flagend=false;
+            private boolean flagscreen=false;
+            private String tmp=null;
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                while (running) {
+                    try {
+                        if (in != null && in.ready()&& (tmp=in.readLine())!=null) {
+                            String read = tmp;
+                            if (!"".equals(read)) {
+                                System.out.println("CLIENT GET: " + read);
+                                final String finalStr = read;
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i("测试",finalStr);
+                                        Log.i("本机IP",getHostIP());
+                                        if (finalStr.equals("1")&&!flagstart) {
+                                            lockScreen.show(true);
+                                            closeBar();
+                                            flagstart=true;
+                                            flagend=false;
+                                        }
+                                        else if (finalStr.equals("2")&&!flagend) {
+                                            lockScreen.show(false);
+                                            showBar();
+                                            flagend=true;
+                                            flagstart=false;
+                                        }
+                                        else if (finalStr.equals(getHostIP())&&!flagscreen){
+                                            Log.i("发送","启动");
+                                            sendd(1);
+                                            flagscreen=true;
+
+                                        }
+                                        else if(finalStr.equals("3")&&flagscreen){
+                                            sendd(2);
+                                            flagscreen=false;
+                                        }
+
+                                    }
+                                });
+                            }
+                        }
+                        sleep(100L);
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        System.out.println("CLIENT EXCPETION: " + e.getMessage());
+                        running = false;
+                        break;
+                    }
+                }
+                super.run();
+            }
+        }
+        /*
+        长链接+自动重连
+         */
+        class autoSendBreak extends Thread{
+            Socket socket=null;
+            boolean isConnect=true;
+            String ipp=null;
+            autoSendBreak(Socket socket,String ipp){
+                this.socket=socket;
+                this.ipp=ipp;
+            }
+
+            @Override
+            public void run() {
+                while (isConnect) {
+                    try {
+                        String test = "\n";
+                        socket.getOutputStream().write(test.getBytes());
+//                    socket.sendUrgentData(0xFF);
+                    } catch (IOException e) {
+                        isConnect=false;
+                        ServerClient.interrupted();
+                        ServerListener.interrupted();
+                        new ServerClient(ipp).start();
+
+                        e.printStackTrace();
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
+
+
+//    class linkThread extends Thread{
+//        private Socket sc;
+//        private boolean flagstart=false;
+//        private boolean flagend=false;
+//        private boolean flagscreen=false;
+//        private String ipp;
+//        linkThread(String ipp){
+//            this.ipp=ipp;
+//            Log.i("ipp",ipp);
+//        }
+//        @Override
+//        public void run() {
+//            //初始化一个socket
+//            try {
+//                final InetAddress addr=InetAddress.getLocalHost();
+//                sc = new Socket(ipp, 12370);
+//                new autoSendBreak(sc,ipp).start();
+////                save.getSocket(sc);
+//                BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream(), "UTF-8"));
+//                String str = null;
+//                while ((str = br.readLine()) != null) {
+//                    final String finalStr = str;
+//                    handler.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Log.i("测试",finalStr);
+//                            Log.i("本机IP",getHostIP());
+//                            if (finalStr.equals("1")&&!flagstart) {
+//                                lockScreen.show(true);
+//                                closeBar();
+//                                flagstart=true;
+//                                flagend=false;
+//                            }
+//                            else if (finalStr.equals("2")&&!flagend) {
+//                                lockScreen.show(false);
+//                                showBar();
+//                                flagend=true;
+//                                flagstart=false;
+//                            }
+//                            else if (finalStr.equals(getHostIP())&&!flagscreen){
+//                                Log.i("发送","启动");
+//                                sendd(1);
+//                                flagscreen=true;
+//
+//                            }
+//                            else if(finalStr.equals("3")&&flagscreen){
+//                                sendd(2);
+//                                flagscreen=false;
+//                            }
+//
+//                        }
+//                    });
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     private void initReceive() {
         new Thread(new Runnable() {
@@ -538,7 +710,10 @@ public class MainActivity extends AppCompatActivity {
 //        view.destroyDrawingCache();
 //        return b;
 //    }
-//
+    /*
+    发射屏幕
+     */
+
     public class ServerComponent implements Runnable{
         private int PORT=7899; //端口
         private int SEQMAX=10;
