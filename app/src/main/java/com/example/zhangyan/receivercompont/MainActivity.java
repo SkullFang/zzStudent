@@ -834,9 +834,9 @@ public class MainActivity extends AppCompatActivity {
             public void prepareDatagram(){
                 this.bitmap=b;
                 ByteArrayOutputStream baos=new ByteArrayOutputStream();
-                int quality=50;
+                int quality=50;//这个数值设置了 pad发送屏幕的质量数值越大效果越好，但是pad处理能力和路由器能力有限，要经过实际测试才好设定// 。
 
-                bitmap.compress(Bitmap.CompressFormat.JPEG,10,baos);
+                bitmap.compress(Bitmap.CompressFormat.JPEG,quality,baos);
                 byte[] data=baos.toByteArray();
                 packet=new DatagramPacket(data,data.length,address,PORT);
 //                byte[] data="test".getBytes();
