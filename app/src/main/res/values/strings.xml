@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">receiverCompont</string>
+    <string name="login">请输入教师端IP:</string>
+    <string name="inputname">请输入自己的姓名</string>
+    <string name="loginin">登录</string>
 </resources>

@@ -44,7 +44,7 @@ public class LockScreen {
 
         mLp.systemUiVisibility=View.SYSTEM_UI_FLAG_LOW_PROFILE; //隐藏BAR栏
         mLp.systemUiVisibility = View.STATUS_BAR_HIDDEN;
-        mLp.systemUiVisibility=View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+//        mLp.systemUiVisibility=View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
         mLp.width=WindowManager.LayoutParams.MATCH_PARENT;
         mLp.height=WindowManager.LayoutParams.MATCH_PARENT; //充满整个父容器
